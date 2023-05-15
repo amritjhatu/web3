@@ -1,6 +1,7 @@
 const PAGE_SIZE = 10;
 let currentPage = 1;
 let pokemons = [];
+let currentPokemons = [];
 
 const updatePaginationDiv = (currentPage, numPages) => {
   $('#pagination').empty();
@@ -75,26 +76,27 @@ const filterPokemons = async () => {
     const filteredPokemons = (await Promise.all(pokemons.map(async (pokemon) => {
       const res = await axios.get(pokemon.url);
       const types = res.data.types.map((type) => type.type.name);
-      return selectedTypes.every((type) => types.includes(type)) ? pokemon : null;
+      return selectedTypes.some((type) => types.includes(type)) ? pokemon : null;
     }))).filter(pokemon => pokemon);
   
-    currentPage = 1;
-    const numPages = Math.ceil(filteredPokemons.length / PAGE_SIZE);
-    paginate(currentPage, PAGE_SIZE, filteredPokemons);
+    currentPokemons = filteredPokemons; // Update currentPokemons with filteredPokemons
+    const numPages = Math.ceil(currentPokemons.length / PAGE_SIZE);
+    paginate(currentPage, PAGE_SIZE, currentPokemons); // Use currentPokemons here
     updatePaginationDiv(currentPage, numPages);
-    updateDisplayedPokemonsInfo(currentPage, PAGE_SIZE, filteredPokemons.length);
+    updateDisplayedPokemonsInfo(currentPage, PAGE_SIZE, currentPokemons.length);
   };
   
 
 const setup = async () => {
-  const response = await axios.get('https://pokeapi.co/api/v2/pokemon?offset=0&limit=810');
-  pokemons = response.data.results;
-  const numPages = Math.ceil(pokemons.length / PAGE_SIZE);
-
-  paginate(currentPage, PAGE_SIZE, pokemons);
-  updatePaginationDiv(currentPage, numPages);
-  updateDisplayedPokemonsInfo(currentPage, PAGE_SIZE, pokemons.length);
-  fetchAndDisplayTypes();
+    const response = await axios.get('https://pokeapi.co/api/v2/pokemon?offset=0&limit=810');
+    pokemons = response.data.results;
+    currentPokemons = pokemons; // Assign all pokemons to currentPokemons initially
+    const numPages = Math.ceil(currentPokemons.length / PAGE_SIZE);
+  
+    paginate(currentPage, PAGE_SIZE, currentPokemons); // Use currentPokemons here
+    updatePaginationDiv(currentPage, numPages);
+    updateDisplayedPokemonsInfo(currentPage, PAGE_SIZE, currentPokemons.length); // Use currentPokemons here
+    fetchAndDisplayTypes();
 
   $('body').on('click', '.pokeCard', async function (e) {
     const pokemonName = $(this).attr('pokeName');
@@ -130,11 +132,12 @@ const setup = async () => {
 
   $('body').on('click', '.page', async function (e) {
     currentPage = Number(e.target.value);
-    paginate(currentPage, PAGE_SIZE, pokemons);
+    const numPages = Math.ceil(currentPokemons.length / PAGE_SIZE);
+    paginate(currentPage, PAGE_SIZE, currentPokemons); // Use currentPokemons here
     updatePaginationDiv(currentPage, numPages);
-    updateDisplayedPokemonsInfo(currentPage, PAGE_SIZE, pokemons.length);
+    updateDisplayedPokemonsInfo(currentPage, PAGE_SIZE, currentPokemons.length); // Use currentPokemons here
   });
-
+  
   $('body').on('change', '.typeCheckbox', filterPokemons);
 };
 
