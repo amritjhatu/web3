@@ -42,10 +42,11 @@ const paginate = async (currentPage, PAGE_SIZE, pokemons) => {
 };
 
 const updateDisplayedPokemonsInfo = (currentPage, PAGE_SIZE, totalPokemons) => {
-  const start = (currentPage - 1) * PAGE_SIZE + 1;
-  const end = Math.min(currentPage * PAGE_SIZE, totalPokemons);
-  $('#displayedPokemonsInfo').text(`Displaying ${start}-${end} of ${totalPokemons} Pokémon`);
-};
+    const start = (currentPage - 1) * PAGE_SIZE + 1;
+    const end = Math.min(currentPage * PAGE_SIZE, totalPokemons);
+    $('#displayedPokemonsInfo').text(`Displaying ${start}-${end} of ${totalPokemons} Pokémon`);
+  };
+  
 
 const fetchAndDisplayTypes = async () => {
   const res = await axios.get('https://pokeapi.co/api/v2/type');
