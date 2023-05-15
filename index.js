@@ -48,43 +48,41 @@ const updateDisplayedPokemonsInfo = (currentPage, PAGE_SIZE, totalPokemons) => {
 };
 
 const fetchAndDisplayTypes = async () => {
-    const res = await axios.get('https://pokeapi.co/api/v2/type');
-    const types = res.data.results;
-  
-    types.forEach((type) => {
-      const formCheckDiv = $('<div>').addClass('form-check');
-      const inputElement = $('<input>')
-        .addClass('form-check-input typeCheckbox')
-        .attr('type', 'checkbox')
-        .attr('value', type.name)
-        .attr('id', type.name);
-      const labelElement = $('<label>')
-        .addClass('form-check-label')
-        .attr('for', type.name)
-        .text(type.name);
-  
-      formCheckDiv.append(inputElement).append(labelElement);
-      $('#typeFilter').append(formCheckDiv);
-    });
-  };
-  
+  const res = await axios.get('https://pokeapi.co/api/v2/type');
+  const types = res.data.results;
+
+  types.forEach((type) => {
+    const formCheckDiv = $('<div>').addClass('form-check');
+    const inputElement = $('<input>')
+      .addClass('form-check-input typeCheckbox')
+      .attr('type', 'checkbox')
+      .attr('value', type.name)
+      .attr('id', type.name);
+    const labelElement = $('<label>')
+      .addClass('form-check-label')
+      .attr('for', type.name)
+      .text(type.name);
+
+    formCheckDiv.append(inputElement).append(labelElement);
+    $('#typeFilter').append(formCheckDiv);
+  });
+};
 
 const filterPokemons = async () => {
-    const selectedTypes = $('.typeCheckbox:checked').map((_, checkbox) => checkbox.value).get();
-  
-    const filteredPokemons = (await Promise.all(pokemons.map(async (pokemon) => {
-      const res = await axios.get(pokemon.url);
-      const types = res.data.types.map((type) => type.type.name);
-      return types.some((type) => selectedTypes.includes(type)) ? pokemon : null;
-    }))).filter(pokemon => pokemon);
-  
-    currentPage = 1;
-    const numPages = Math.ceil(filteredPokemons.length / PAGE_SIZE);
-    paginate(currentPage, PAGE_SIZE, filteredPokemons);
-    updatePaginationDiv(currentPage, numPages);
-    updateDisplayedPokemonsInfo(currentPage, PAGE_SIZE, filteredPokemons.length);
-  };
-  
+  const selectedTypes = $('.typeCheckbox:checked').map((_, checkbox) => checkbox.value).get();
+
+  const filteredPokemons = (await Promise.all(pokemons.map(async (pokemon) => {
+    const res = await axios.get(pokemon.url);
+    const types = res.data.types.map((type) => type.type.name);
+    return types.some((type) => selectedTypes.includes(type)) ? pokemon : null;
+  }))).filter(pokemon => pokemon);
+
+  currentPage = 1;
+  const numPages = Math.ceil(filteredPokemons.length / PAGE_SIZE);
+  paginate(currentPage, PAGE_SIZE, filteredPokemons);
+  updatePaginationDiv(currentPage, numPages);
+  updateDisplayedPokemonsInfo(currentPage, PAGE_SIZE, filteredPokemons.length);
+};
 
 const setup = async () => {
   const response = await axios.get('https://pokeapi.co/api/v2/pokemon?offset=0&limit=810');
@@ -139,3 +137,4 @@ const setup = async () => {
 };
 
 $(document).ready(setup);
+
