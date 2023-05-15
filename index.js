@@ -72,19 +72,26 @@ const fetchAndDisplayTypes = async () => {
 
 const filterPokemons = async () => {
     const selectedTypes = $('.typeCheckbox:checked').map((_, checkbox) => checkbox.value).get();
+    
+    // If no types are selected, show all Pokémon
+    if (selectedTypes.length === 0) {
+      currentPokemons = pokemons;
+    } else {
+      // Otherwise, filter the Pokémon
+      currentPokemons = (await Promise.all(pokemons.map(async (pokemon) => {
+        const res = await axios.get(pokemon.url);
+        const types = res.data.types.map((type) => type.type.name);
+        return selectedTypes.every((type) => types.includes(type)) ? pokemon : null;
+      }))).filter(pokemon => pokemon);
+    }
   
-    const filteredPokemons = (await Promise.all(pokemons.map(async (pokemon) => {
-      const res = await axios.get(pokemon.url);
-      const types = res.data.types.map((type) => type.type.name);
-      return selectedTypes.some((type) => types.includes(type)) ? pokemon : null;
-    }))).filter(pokemon => pokemon);
-  
-    currentPokemons = filteredPokemons; // Update currentPokemons with filteredPokemons
+    currentPage = 1;
     const numPages = Math.ceil(currentPokemons.length / PAGE_SIZE);
-    paginate(currentPage, PAGE_SIZE, currentPokemons); // Use currentPokemons here
+    paginate(currentPage, PAGE_SIZE, currentPokemons);
     updatePaginationDiv(currentPage, numPages);
     updateDisplayedPokemonsInfo(currentPage, PAGE_SIZE, currentPokemons.length);
   };
+  
   
 
 const setup = async () => {
